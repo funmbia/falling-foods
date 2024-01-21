@@ -1,0 +1,143 @@
+<!-- Author: funmbia -->
+<!-- Jan 20 -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale1">
+    <title>Falling Foods</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background-color: rgb(199, 224, 245);
+        }
+        .food {
+            position: absolute;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        #hscorediv {
+            position: absolute;
+            top: 2%;
+            left: 2%;
+            font-size: 20px;
+        }
+        #score {
+            position: absolute;
+            top: 2%;
+            right: 2%;
+            font-size: 20px;
+        }
+        img {
+            position: absolute;
+            top: 5%;
+            right: 2%;
+            width: 50px;
+        }
+    </style>
+</head>
+
+<body onload="level()">
+    <div id="game-container">
+        <div id="hscorediv">High Score: <p id="hscore"></p></div>
+        <div id="score">Score: 0</div>
+        <img onclick="pause()" id="pause" src="pause.png">
+    </div>
+
+    <script>
+        var speed, score = 0;
+        var hscore = parseInt(localStorage.getItem("hscore"), 10) || 0;
+        var gameInterval;
+
+        function level() {
+            let person = prompt("Which level would you like to play? Easy, Medium, or Hard", "");
+            if (person == null || person == "") {
+                alert("Please enter Easy, Medium, or Hard");
+                level();
+            } else {
+                if (person.toLowerCase() === "easy") speed = 2;
+                else if (person.toLowerCase() === "medium") speed = 4;
+                else if (person.toLowerCase() === "hard") speed = 6;
+                else {
+                    alert("Please enter Easy, Medium, or Hard");
+                    level();
+                }
+            }
+            startGame();
+        }
+
+        function startGame() {
+            gameInterval = setInterval(createFood, 1500);
+        }
+
+        function createFood() {
+            const gameContainer = document.getElementById("game-container");
+            const food = document.createElement("div");
+            const foods = ["🍔", "🍕", "🍟", "🌭", "🍦", "🍩", "🍗", "🌮", "🍫", "🧀"];
+            food.classList.add("food");
+            food.textContent = foods[Math.floor(Math.random() * foods.length)];
+            food.style.fontSize = "40px";
+            food.style.left = Math.random() * (gameContainer.offsetWidth - 40) + "px";
+            food.style.top = "0";
+            food.addEventListener("click", handleFoodClick);
+            gameContainer.appendChild(food);
+
+            function moveFood() {
+                const currentTop = parseFloat(food.style.top);
+                if (currentTop < gameContainer.offsetHeight) {
+                    food.style.top = currentTop + speed + "px";
+                    requestAnimationFrame(moveFood);
+                } else {
+                    gameContainer.removeChild(food);
+                    score--;
+                    updateScore();
+                }
+            }
+
+            moveFood();
+        }
+
+        function handleFoodClick(event) {
+            const clickedFood = event.target;
+            document.getElementById("game-container").removeChild(clickedFood);
+            score++;
+            updateScore();
+        }
+
+        function updateScore() {
+            const scoreElement = document.getElementById("score");
+            scoreElement.textContent = "Score: " + score;
+
+            if (score > hscore) {
+                hscore = score;
+                saveData();
+            }
+        }
+
+        function pause() {
+            clearInterval(gameInterval);
+            alert("Game is paused. Keep Playing?");
+            startGame();
+        }
+
+        function saveData() {
+            localStorage.setItem("hscore", hscore);
+            document.getElementById("hscore").textContent = hscore;
+        }
+        function getData() {
+            document.getElementById("hscore").textContent = hscore;
+        }
+
+        getData();
+    </script>
+</body>
+</html>
